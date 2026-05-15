@@ -1,0 +1,66 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+    container_name: fitness-frontend
+    environment:
+      PORT: 3000
+      WORKOUT_SERVICE_URL: http://workout-service:4001
+      NUTRITION_SERVICE_URL: http://nutrition-service:4002
+      PROGRESS_SERVICE_URL: http://progress-service:4003
+    ports:
+      - "3000:3000"
+    depends_on:
+      workout-service:
+        condition: service_healthy
+      nutrition-service:
+        condition: service_healthy
+      progress-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  workout-service:
+    build:
+      context: ./services/workout-service
+    container_name: workout-service
+    environment:
+      PORT: 4001
+    ports:
+      - "4001:4001"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  nutrition-service:
+    build:
+      context: ./services/nutrition-service
+    container_name: nutrition-service
+    environment:
+      PORT: 4002
+    ports:
+      - "4002:4002"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4002/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  progress-service:
+    build:
+      context: ./services/progress-service
+    container_name: progress-service
+    environment:
+      PORT: 4003
+    ports:
+      - "4003:4003"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4003/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 5

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FitFlow | Dashboard</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body data-page="home">
+    <header class="site-header">
+      <a class="brand" href="/">FitFlow</a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="/" aria-current="page">Dashboard</a>
+        <a href="/workouts">Workouts</a>
+        <a href="/nutrition">Nutrition</a>
+        <a href="/progress">Progress</a>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Microservice fitness platform</p>
+          <h1>Train, fuel, and track with one clear plan.</h1>
+          <p class="lede">FitFlow brings workout, nutrition, and progress services into a focused dashboard built with a Node.js frontend.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="/workouts">Start training</a>
+            <a class="button secondary" href="/progress">View progress</a>
+          </div>
+        </div>
+        <aside class="status-panel" aria-label="Service status">
+          <span class="status-dot"></span>
+          <span>All services online</span>
+        </aside>
+      </section>
+
+      <section class="quick-stats" aria-label="Quick stats">
+        <div><strong>5</strong><span>weekly workouts</span></div>
+        <div><strong>155g</strong><span>protein target</span></div>
+        <div><strong>86%</strong><span>consistency</span></div>
+      </section>
+
+      <section class="section-heading">
+        <p class="eyebrow">Your services</p>
+        <h2>Fitness tools split into focused microservices</h2>
+      </section>
+
+      <section class="dashboard" aria-live="polite">
+        <article class="panel service-card">
+          <div class="panel-heading">
+            <span class="icon icon-workout">W</span>
+            <h3>Workouts</h3>
+          </div>
+          <p>Plans, session focus, equipment, and weekly schedule.</p>
+          <div id="workouts" class="content-list">Loading workouts...</div>
+          <a class="text-link" href="/workouts">Open workouts</a>
+        </article>
+
+        <article class="panel service-card">
+          <div class="panel-heading">
+            <span class="icon icon-nutrition">N</span>
+            <h3>Nutrition</h3>
+          </div>
+          <p>Meal ideas, macros, hydration, and daily targets.</p>
+          <div id="nutrition" class="content-list">Loading nutrition...</div>
+          <a class="text-link" href="/nutrition">Open nutrition</a>
+        </article>
+
+        <article class="panel service-card">
+          <div class="panel-heading">
+            <span class="icon icon-progress">P</span>
+            <h3>Progress</h3>
+          </div>
+          <p>Weekly activity, consistency, milestones, and trends.</p>
+          <div id="progress" class="content-list">Loading progress...</div>
+          <a class="text-link" href="/progress">Open progress</a>
+        </article>
+      </section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

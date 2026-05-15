@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FitFlow | Progress</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body data-page="progress">
+    <header class="site-header">
+      <a class="brand" href="/">FitFlow</a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="/">Dashboard</a>
+        <a href="/workouts">Workouts</a>
+        <a href="/nutrition">Nutrition</a>
+        <a href="/progress" aria-current="page">Progress</a>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <section class="page-hero progress-hero">
+        <p class="eyebrow">Progress service</p>
+        <h1>See what is improving, week by week.</h1>
+        <p class="lede">Metrics, milestones, and completion trends are powered by the progress microservice.</p>
+      </section>
+
+      <section id="progress-detail" class="metric-grid">Loading progress...</section>
+
+      <section class="split-layout">
+        <section class="panel">
+          <p class="eyebrow">Trend</p>
+          <h2>Weekly completion</h2>
+          <div id="progress-trend" class="trend-list">Loading trend...</div>
+        </section>
+        <section class="panel">
+          <p class="eyebrow">Milestones</p>
+          <h2>Goals and achievements</h2>
+          <div id="progress-milestones" class="content-list">Loading milestones...</div>
+        </section>
+      </section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

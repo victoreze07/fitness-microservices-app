@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FitFlow | Workouts</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body data-page="workouts">
+    <header class="site-header">
+      <a class="brand" href="/">FitFlow</a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="/">Dashboard</a>
+        <a href="/workouts" aria-current="page">Workouts</a>
+        <a href="/nutrition">Nutrition</a>
+        <a href="/progress">Progress</a>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <section class="page-hero workouts-hero">
+        <p class="eyebrow">Workout service</p>
+        <h1>Build a week of training that actually fits.</h1>
+        <p class="lede">Strength, cardio, and recovery sessions are delivered by the workout microservice.</p>
+      </section>
+
+      <section class="split-layout">
+        <aside class="panel">
+          <p class="eyebrow">Featured plan</p>
+          <div id="workout-plan" class="feature-box">Loading plan...</div>
+        </aside>
+        <section>
+          <div class="section-heading compact">
+            <p class="eyebrow">Session library</p>
+            <h2>Recommended workouts</h2>
+          </div>
+          <div id="workouts-detail" class="detail-grid">Loading workouts...</div>
+        </section>
+      </section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

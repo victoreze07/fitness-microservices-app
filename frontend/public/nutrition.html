@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FitFlow | Nutrition</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body data-page="nutrition">
+    <header class="site-header">
+      <a class="brand" href="/">FitFlow</a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="/">Dashboard</a>
+        <a href="/workouts">Workouts</a>
+        <a href="/nutrition" aria-current="page">Nutrition</a>
+        <a href="/progress">Progress</a>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <section class="page-hero nutrition-hero">
+        <p class="eyebrow">Nutrition service</p>
+        <h1>Fuel your training without guessing.</h1>
+        <p class="lede">Daily targets and meal ideas come from the nutrition microservice.</p>
+      </section>
+
+      <section id="nutrition-targets" class="quick-stats">Loading targets...</section>
+
+      <section class="section-heading compact">
+        <p class="eyebrow">Meal plan</p>
+        <h2>Balanced meals for the day</h2>
+      </section>
+      <section id="nutrition-detail" class="detail-grid">Loading meals...</section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
