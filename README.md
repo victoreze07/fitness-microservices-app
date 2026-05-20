@@ -90,3 +90,46 @@ Inside Docker Compose and Kubernetes, the frontend talks to the services by DNS 
 - `http://progress-service:4003`
 
 Those values are configured with environment variables in `docker-compose.yml` and `k8s/frontend.yaml`.
+
+## Jenkins Pipeline
+
+This repo includes a `Jenkinsfile` for CI/CD.
+
+Pipeline stages:
+
+- Validate Node.js files with `node --check`.
+- Validate Docker Compose with `docker compose config`.
+- Build Docker images for the frontend and all three services.
+- Optionally push images to a Docker registry.
+- Optionally deploy and update Kubernetes deployments.
+
+Jenkins agent requirements:
+
+- Git
+- Node.js 18 or newer
+- Docker CLI with Docker daemon access
+- Docker Compose plugin
+- kubectl, if deploying to Kubernetes
+- Jenkins Docker Pipeline plugin
+
+Recommended Jenkins credentials:
+
+```text
+docker-registry-credentials
+fitness-kubeconfig
+```
+
+`docker-registry-credentials` should be a username/password credential for Docker Hub, GitHub Container Registry, or your preferred registry.
+
+`fitness-kubeconfig` should be a secret file credential containing the kubeconfig Jenkins should use for deployment.
+
+Typical Jenkins build parameters:
+
+```text
+DOCKER_REGISTRY=docker.io/your-username
+IMAGE_TAG=latest
+PUSH_IMAGES=true
+DEPLOY_TO_K8S=true
+```
+
+For a local-only build, leave `DOCKER_REGISTRY` empty and keep `PUSH_IMAGES` and `DEPLOY_TO_K8S` unchecked.
