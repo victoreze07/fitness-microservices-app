@@ -109,6 +109,7 @@ Jenkins agent requirements:
 - Node.js 18 or newer
 - Docker CLI with Docker daemon access
 - Docker Compose plugin
+- Trivy
 - kubectl, if deploying to Kubernetes
 
 Recommended Jenkins credentials:
@@ -127,11 +128,14 @@ Typical Jenkins build parameters:
 ```text
 DOCKER_REGISTRY=docker.io/your-username
 IMAGE_TAG=
+FAIL_ON_TRIVY_FINDINGS=true
 PUSH_IMAGES=true
 DEPLOY_TO_K8S=true
 ```
 
 When `IMAGE_TAG` is empty, Jenkins uses the current build number.
+
+The Trivy stage scans every built image and fails on HIGH or CRITICAL vulnerabilities by default. Set `FAIL_ON_TRIVY_FINDINGS=false` only when you want the scan to report findings without blocking the pipeline.
 
 For a local-only build, leave `DOCKER_REGISTRY` empty and keep `PUSH_IMAGES` and `DEPLOY_TO_K8S` unchecked.
 

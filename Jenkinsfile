@@ -44,6 +44,7 @@ pipeline {
   parameters {
     string(name: 'DOCKER_REGISTRY', defaultValue: '', description: 'Optional registry namespace, for example docker.io/your-user or ghcr.io/your-user.')
     string(name: 'IMAGE_TAG', defaultValue: '', description: 'Optional image tag. Empty uses the Jenkins build number.')
+    booleanParam(name: 'FAIL_ON_TRIVY_FINDINGS', defaultValue: true, description: 'Fail the build when Trivy finds HIGH or CRITICAL vulnerabilities.')
     booleanParam(name: 'PUSH_IMAGES', defaultValue: false, description: 'Push images to the Docker registry.')
     booleanParam(name: 'DEPLOY_TO_K8S', defaultValue: false, description: 'Deploy the application to Kubernetes.')
   }
@@ -82,6 +83,19 @@ pipeline {
             if (env.RESOLVED_REGISTRY) {
               runCmd("docker tag ${localImage} ${env.RESOLVED_REGISTRY}/${localImage}")
             }
+          }
+        }
+      }
+    }
+
+    stage('Trivy Image Scan') {
+      steps {
+        script {
+          def exitCode = params.FAIL_ON_TRIVY_FINDINGS ? '1' : '0'
+
+          services.each { service ->
+            def localImage = "${service.image}:${env.RESOLVED_IMAGE_TAG}"
+            runCmd("trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code ${exitCode} --no-progress ${localImage}")
           }
         }
       }
