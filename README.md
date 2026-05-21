@@ -101,7 +101,7 @@ Pipeline stages:
 - Validate Docker Compose with `docker compose config`.
 - Build Docker images for the frontend and all three services.
 - Optionally push images to a Docker registry.
-- Optionally deploy and update Kubernetes deployments.
+- Optionally deploy and update Kubernetes deployments, or let Argo CD sync the Kubernetes manifests from Git.
 
 Jenkins agent requirements:
 
@@ -146,3 +146,48 @@ For GitHub Container Registry:
 ```text
 ghcr.io/your-github-username
 ```
+
+## Argo CD GitOps
+
+This repo includes Argo CD manifests in `argocd/`.
+
+Files:
+
+```text
+argocd/fitness-project.yaml
+argocd/fitness-application.yaml
+argocd/README.md
+k8s/kustomization.yaml
+```
+
+Before applying Argo CD, edit `argocd/fitness-application.yaml` and replace:
+
+```text
+https://github.com/YOUR_GITHUB_USERNAME/fitness-microservices.git
+```
+
+with your real GitHub repository URL.
+
+Apply the Argo CD app:
+
+```powershell
+kubectl apply -f argocd/fitness-project.yaml
+kubectl apply -f argocd/fitness-application.yaml
+```
+
+When using Argo CD, set Jenkins like this:
+
+```text
+PUSH_IMAGES=true
+DEPLOY_TO_K8S=false
+```
+
+Jenkins builds and pushes images. Argo CD watches GitHub and syncs the Kubernetes manifests.
+
+For a real cluster, make sure the image fields in `k8s/*.yaml` use pullable registry images, such as:
+
+```text
+docker.io/your-dockerhub-username/fitness-frontend:latest
+```
+
+Local names like `fitness-frontend:latest` work only when the image already exists inside the cluster node runtime.
