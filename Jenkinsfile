@@ -6,6 +6,26 @@ def runCmd(command) {
   }
 }
 
+def dockerLogin(registryHost) {
+  withCredentials([usernamePassword(
+    credentialsId: env.DOCKER_CREDENTIALS_ID,
+    usernameVariable: 'DOCKER_USERNAME',
+    passwordVariable: 'DOCKER_PASSWORD'
+  )]) {
+    if (isUnix()) {
+      sh """
+        set +x
+        printf '%s' "\$DOCKER_PASSWORD" | docker login ${registryHost} -u "\$DOCKER_USERNAME" --password-stdin
+      """
+    } else {
+      bat """
+        @echo off
+        echo %DOCKER_PASSWORD% | docker login ${registryHost} -u %DOCKER_USERNAME% --password-stdin
+      """
+    }
+  }
+}
+
 def services = [
   [key: 'frontend', image: 'fitness-frontend', context: 'frontend', deployment: 'frontend', container: 'frontend'],
   [key: 'workout', image: 'workout-service', context: 'services/workout-service', deployment: 'workout-service', container: 'workout-service'],
@@ -52,7 +72,7 @@ pipeline {
       steps {
         script {
           env.RESOLVED_IMAGE_TAG = params.IMAGE_TAG?.trim() ? params.IMAGE_TAG.trim() : env.BUILD_NUMBER
-          env.RESOLVED_REGISTRY = params.DOCKER_REGISTRY?.trim()
+          env.RESOLVED_REGISTRY = params.DOCKER_REGISTRY?.trim()?.toLowerCase()
           env.REGISTRY_HOST = env.RESOLVED_REGISTRY ? env.RESOLVED_REGISTRY.tokenize('/')[0] : ''
 
           services.each { service ->
@@ -77,10 +97,10 @@ pipeline {
             error('DOCKER_REGISTRY is required when PUSH_IMAGES is enabled.')
           }
 
-          docker.withRegistry("https://${env.REGISTRY_HOST}", env.DOCKER_CREDENTIALS_ID) {
-            services.each { service ->
-              runCmd("docker push ${env.RESOLVED_REGISTRY}/${service.image}:${env.RESOLVED_IMAGE_TAG}")
-            }
+          dockerLogin(env.REGISTRY_HOST)
+
+          services.each { service ->
+            runCmd("docker push ${env.RESOLVED_REGISTRY}/${service.image}:${env.RESOLVED_IMAGE_TAG}")
           }
         }
       }

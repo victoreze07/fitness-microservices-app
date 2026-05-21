@@ -110,7 +110,6 @@ Jenkins agent requirements:
 - Docker CLI with Docker daemon access
 - Docker Compose plugin
 - kubectl, if deploying to Kubernetes
-- Jenkins Docker Pipeline plugin
 
 Recommended Jenkins credentials:
 
@@ -127,9 +126,23 @@ Typical Jenkins build parameters:
 
 ```text
 DOCKER_REGISTRY=docker.io/your-username
-IMAGE_TAG=latest
+IMAGE_TAG=
 PUSH_IMAGES=true
 DEPLOY_TO_K8S=true
 ```
 
+When `IMAGE_TAG` is empty, Jenkins uses the current build number.
+
 For a local-only build, leave `DOCKER_REGISTRY` empty and keep `PUSH_IMAGES` and `DEPLOY_TO_K8S` unchecked.
+
+For Docker Hub, `DOCKER_REGISTRY` should include your namespace, not only the host:
+
+```text
+docker.io/your-dockerhub-username
+```
+
+For GitHub Container Registry:
+
+```text
+ghcr.io/your-github-username
+```
