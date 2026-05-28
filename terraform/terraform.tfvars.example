@@ -1,0 +1,19 @@
+aws_region   = "us-east-1"
+project_name = "fitness"
+
+# Leave null to let AWS choose its default supported EKS version.
+cluster_version = null
+
+node_instance_types = ["t3.medium"]
+node_desired_size   = 1
+node_min_size       = 1
+node_max_size       = 2
+node_disk_size      = 20
+
+install_argocd       = true
+argocd_namespace     = "argocd"
+argocd_chart_version = "7.7.11"
+
+tags = {
+  Environment = "dev"
+}
