@@ -3,3 +3,10 @@ npm-debug.log*
 .env
 .DS_Store
 .run-logs/
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+backend.hcl
+crash.log
+crash.*.log
