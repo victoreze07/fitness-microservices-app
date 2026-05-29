@@ -9,6 +9,27 @@ A small Node.js fitness website split into four services:
 
 The project can run locally with Docker Compose or deploy to Kubernetes.
 
+## Infrastructure With Terraform
+
+Terraform files are available in `terraform/` to create an AWS EKS cluster with one managed node group and install Argo CD.
+
+```powershell
+cd terraform
+Copy-Item terraform.tfvars.example terraform.tfvars
+terraform init
+terraform plan
+terraform apply
+```
+
+After apply, configure kubectl using the Terraform output:
+
+```powershell
+aws eks update-kubeconfig --region us-east-1 --name fitness-eks
+kubectl get nodes
+```
+
+See `terraform/README.md` for the full infrastructure steps.
+
 ## Run With Docker Compose
 
 ```powershell

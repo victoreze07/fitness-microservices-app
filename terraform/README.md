@@ -60,6 +60,61 @@ kubectl version --client
 aws sts get-caller-identity
 ```
 
+## Remote State In S3
+
+Terraform is configured to use an S3 backend:
+
+```hcl
+backend "s3" {
+  bucket = "eze-fitness-app-s3"
+  key    = "fitness/eks/terraform.tfstate"
+  region = "us-east-1"
+
+  # dynamodb_table = "terraform-state-locks"
+
+  encrypt = true
+}
+```
+
+Create the backend S3 bucket once before running `terraform init`.
+
+This project uses:
+
+```text
+eze-fitness-app-s3
+```
+
+```powershell
+aws s3api create-bucket `
+  --bucket eze-fitness-app-s3 `
+  --region us-east-1
+
+aws s3api put-bucket-versioning `
+  --bucket eze-fitness-app-s3 `
+  --versioning-configuration Status=Enabled
+
+aws s3api put-bucket-encryption `
+  --bucket eze-fitness-app-s3 `
+  --server-side-encryption-configuration '{\"Rules\":[{\"ApplyServerSideEncryptionByDefault\":{\"SSEAlgorithm\":\"AES256\"}}]}'
+```
+
+Optional DynamoDB state locking:
+
+```powershell
+aws dynamodb create-table `
+  --table-name terraform-state-locks `
+  --attribute-definitions AttributeName=LockID,AttributeType=S `
+  --key-schema AttributeName=LockID,KeyType=HASH `
+  --billing-mode PAY_PER_REQUEST `
+  --region us-east-1
+```
+
+Initialize Terraform:
+
+```powershell
+terraform init
+```
+
 ## Create The Cluster
 
 ```powershell
