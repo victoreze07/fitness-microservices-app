@@ -15,7 +15,7 @@ This setup is designed for a simple development cluster. It uses public subnets 
 ## Layout
 
 ```text
-terraform/
+terraform-eks/
   versions.tf
   providers.tf
   variables.tf
@@ -118,7 +118,7 @@ terraform init
 ## Create The Cluster
 
 ```powershell
-cd terraform
+cd terraform-eks
 Copy-Item terraform.tfvars.example terraform.tfvars
 terraform init
 terraform plan
@@ -174,7 +174,7 @@ kubectl apply -f k8s/
 
 ## Destroy The Cluster
 
-From the `terraform` folder:
+From the `terraform-eks` folder:
 
 ```powershell
 terraform destroy

@@ -123,21 +123,29 @@ install_sonarqube_server: false
 
 ## Jenkins Setup After Playbook
 
-Install the suggested Jenkins plugins in the setup wizard.
+The playbook installs the Jenkins plugins listed in:
 
-This playbook also writes a plugin reference list to:
+```text
+ansible/group_vars/jenkins.yml
+```
+
+It also writes the plugin reference list to the server:
 
 ```text
 /var/lib/jenkins/fitness-plugins.txt
 ```
 
-At minimum, configure:
+Installed plugins include:
 
 - Pipeline
 - Git
 - Credentials Binding
 - Docker Pipeline
 - SonarQube Scanner for Jenkins
+- Blue Ocean
+- Job DSL
+- Configuration as Code
+- Workspace Cleanup
 
 Then configure Jenkins tools:
 

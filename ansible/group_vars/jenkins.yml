@@ -13,6 +13,8 @@ jenkins_plugins:
   - git
   - credentials-binding
   - sonar
-  - blueocean
   - docker-workflow
-  - pipeline-stage-view
+  - pipeline-graph-view
+  - job-dsl
+  - configuration-as-code
+  - ws-cleanup

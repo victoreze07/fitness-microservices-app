@@ -11,7 +11,7 @@ The project can run locally with Docker Compose or deploy to Kubernetes.
 
 ## Infrastructure With Terraform
 
-Terraform files are available in `terraform/` to create an AWS EKS cluster with one managed node group and install Argo CD.
+Terraform files are available in `terraform-eks/` to create an AWS EKS cluster with one managed node group and install Argo CD.
 
 Terraform files for the Jenkins EC2 server are available in `terraform-ec2/`.
 
@@ -26,7 +26,7 @@ terraform apply
 The Jenkins EC2 spec is Ubuntu Linux on `c5a.xlarge`. After the EC2 instance is created, use the Ansible playbook in `ansible/` to install Jenkins and CI tools.
 
 ```powershell
-cd terraform
+cd terraform-eks
 Copy-Item terraform.tfvars.example terraform.tfvars
 terraform init
 terraform plan
@@ -40,7 +40,7 @@ aws eks update-kubeconfig --region us-east-1 --name fitness-eks
 kubectl get nodes
 ```
 
-See `terraform/README.md` for the full infrastructure steps.
+See `terraform-eks/README.md` for the full infrastructure steps.
 
 ## Run With Docker Compose
 

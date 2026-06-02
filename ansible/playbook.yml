@@ -291,6 +291,25 @@
         port: 8080
         timeout: 180
 
+    - name: Wait for Jenkins initial admin password
+      ansible.builtin.wait_for:
+        path: /var/lib/jenkins/secrets/initialAdminPassword
+        timeout: 180
+
+    - name: Read Jenkins initial admin password
+      ansible.builtin.slurp:
+        src: /var/lib/jenkins/secrets/initialAdminPassword
+      register: jenkins_initial_password
+      no_log: true
+
+    - name: Download Jenkins CLI jar
+      ansible.builtin.get_url:
+        url: http://127.0.0.1:8080/jnlpJars/jenkins-cli.jar
+        dest: /var/lib/jenkins/jenkins-cli.jar
+        owner: jenkins
+        group: jenkins
+        mode: "0644"
+
     - name: Write Jenkins plugin list
       ansible.builtin.copy:
         dest: /var/lib/jenkins/fitness-plugins.txt
@@ -302,13 +321,34 @@
           {{ plugin }}
           {% endfor %}
 
+    - name: Install Jenkins plugins
+      ansible.builtin.command: >-
+        java -jar /var/lib/jenkins/jenkins-cli.jar
+        -s http://127.0.0.1:8080/
+        -auth admin:{{ jenkins_initial_password.content | b64decode | trim }}
+        install-plugin {{ jenkins_plugins | join(' ') }} -deploy
+      register: jenkins_plugin_install
+      changed_when: "'Installing' in jenkins_plugin_install.stdout or 'Installing' in jenkins_plugin_install.stderr or 'Updated' in jenkins_plugin_install.stdout or 'Updated' in jenkins_plugin_install.stderr"
+      no_log: true
+
+    - name: Restart Jenkins after plugin installation
+      ansible.builtin.service:
+        name: jenkins
+        state: restarted
+
+    - name: Wait for Jenkins after plugin restart
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 8080
+        timeout: 240
+
     - name: Show Jenkins initial admin password location
       ansible.builtin.debug:
         msg:
           - "Jenkins is installed on port 8080."
           - "SonarQube is installed on port {{ sonarqube_port }} when install_sonarqube_server is true."
           - "Get the initial password with: sudo cat /var/lib/jenkins/secrets/initialAdminPassword"
-          - "Plugin list written to: /var/lib/jenkins/fitness-plugins.txt"
+          - "Jenkins plugins installed from: /var/lib/jenkins/fitness-plugins.txt"
           - "After setup, configure SonarQube server name as SonarQube and SonarScanner tool name as SonarScanner."
 
     - name: Verify installed tools
