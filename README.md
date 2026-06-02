@@ -153,8 +153,7 @@ Jenkins agent requirements:
 - Node.js 18 or newer
 - Docker CLI with Docker daemon access
 - Docker Compose plugin
-- SonarQube Scanner
-- SonarQube Scanner for Jenkins plugin
+- SonarScanner CLI
 - Trivy
 - kubectl, if deploying to Kubernetes
 
@@ -171,19 +170,19 @@ fitness-kubeconfig
 
 SonarQube Jenkins setup:
 
-- Install the `SonarQube Scanner for Jenkins` plugin.
-- Add a SonarQube server in Jenkins named `SonarQube`.
-- Add a SonarQube scanner tool in Jenkins named `SonarScanner`.
-- Generate a SonarQube token and store it in the Jenkins SonarQube server configuration.
-- Optional quality gate waiting requires a SonarQube webhook pointing to `http://JENKINS_URL/sonarqube-webhook/`.
+- Create a SonarQube project with key `fitness-microservices`.
+- Generate a SonarQube token.
+- Add the token to Jenkins as a Secret text credential named `sonarqube-token`.
+- Make sure the Jenkins agent can run `sonar-scanner`.
+- Set `SONAR_HOST_URL` to the SonarQube URL reachable from Jenkins, usually `http://localhost:9000` when SonarQube runs on the Jenkins server.
 
 Typical Jenkins build parameters:
 
 ```text
 DOCKER_REGISTRY=docker.io/your-username
 IMAGE_TAG=
+SONAR_HOST_URL=http://localhost:9000
 RUN_SONARQUBE=true
-WAIT_FOR_SONAR_QUALITY_GATE=false
 FAIL_ON_TRIVY_FINDINGS=true
 PUSH_IMAGES=true
 DEPLOY_TO_K8S=true

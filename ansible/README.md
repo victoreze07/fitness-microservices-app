@@ -106,6 +106,12 @@ The playbook runs SonarQube in Docker by default:
 http://YOUR_EC2_PUBLIC_IP:9000
 ```
 
+The SonarQube Docker image is pinned in `ansible/group_vars/jenkins.yml`:
+
+```yaml
+sonarqube_image: sonarqube:26.5.0.122743-community
+```
+
 SonarQube can take a few minutes to finish starting after the container is created.
 
 Default login:
@@ -141,7 +147,7 @@ Installed plugins include:
 - Git
 - Credentials Binding
 - Docker Pipeline
-- SonarQube Scanner for Jenkins
+- SonarScanner CLI
 - Blue Ocean
 - Job DSL
 - Configuration as Code
@@ -149,8 +155,8 @@ Installed plugins include:
 
 Then configure Jenkins tools:
 
-- SonarQube server name: `SonarQube`
-- SonarScanner tool name: `SonarScanner`
+- Secret text credential name for the SonarQube token: `sonarqube-token`
+- Pipeline parameter for the SonarQube URL: `SONAR_HOST_URL`
 
 Those names match the `Jenkinsfile`.
 

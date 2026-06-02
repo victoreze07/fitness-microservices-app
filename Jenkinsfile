@@ -27,12 +27,18 @@ def dockerLogin(registryHost) {
 }
 
 def runSonarScanner() {
-  def scannerHome = tool env.SONAR_SCANNER_TOOL
-
   if (isUnix()) {
-    sh "${scannerHome}/bin/sonar-scanner"
+    sh '''
+      set +x
+      sonar-scanner \
+        -Dsonar.host.url="${SONAR_HOST_URL}" \
+        -Dsonar.token="${SONAR_TOKEN}"
+    '''
   } else {
-    bat "\"${scannerHome}\\bin\\sonar-scanner.bat\""
+    bat '''
+      @echo off
+      sonar-scanner -Dsonar.host.url="%SONAR_HOST_URL%" -Dsonar.token="%SONAR_TOKEN%"
+    '''
   }
 }
 
@@ -54,8 +60,8 @@ pipeline {
   parameters {
     string(name: 'DOCKER_REGISTRY', defaultValue: '', description: 'Optional registry namespace, for example docker.io/your-user or ghcr.io/your-user.')
     string(name: 'IMAGE_TAG', defaultValue: '', description: 'Optional image tag. Empty uses the Jenkins build number.')
+    string(name: 'SONAR_HOST_URL', defaultValue: 'http://localhost:9000', description: 'SonarQube server URL reachable from the Jenkins agent.')
     booleanParam(name: 'RUN_SONARQUBE', defaultValue: true, description: 'Run SonarQube code analysis.')
-    booleanParam(name: 'WAIT_FOR_SONAR_QUALITY_GATE', defaultValue: false, description: 'Wait for SonarQube quality gate result. Requires Jenkins webhook configured in SonarQube.')
     booleanParam(name: 'FAIL_ON_TRIVY_FINDINGS', defaultValue: true, description: 'Fail the build when Trivy finds HIGH or CRITICAL vulnerabilities.')
     booleanParam(name: 'PUSH_IMAGES', defaultValue: false, description: 'Push images to the Docker registry.')
     booleanParam(name: 'DEPLOY_TO_K8S', defaultValue: false, description: 'Deploy the application to Kubernetes.')
@@ -65,8 +71,7 @@ pipeline {
     DOCKER_CREDENTIALS_ID = 'docker-registry-credentials'
     KUBECONFIG_CREDENTIALS_ID = 'fitness-kubeconfig'
     K8S_NAMESPACE = 'fitness'
-    SONARQUBE_ENV = 'SonarQube'
-    SONAR_SCANNER_TOOL = 'SonarScanner'
+    SONAR_TOKEN_CREDENTIALS_ID = 'sonarqube-token'
   }
 
   stages {
@@ -89,20 +94,11 @@ pipeline {
       }
       steps {
         script {
-          withSonarQubeEnv(env.SONARQUBE_ENV) {
-            runSonarScanner()
+          withEnv(["SONAR_HOST_URL=${params.SONAR_HOST_URL}"]) {
+            withCredentials([string(credentialsId: env.SONAR_TOKEN_CREDENTIALS_ID, variable: 'SONAR_TOKEN')]) {
+              runSonarScanner()
+            }
           }
-        }
-      }
-    }
-
-    stage('SonarQube Quality Gate') {
-      when {
-        expression { return params.RUN_SONARQUBE && params.WAIT_FOR_SONAR_QUALITY_GATE }
-      }
-      steps {
-        timeout(time: 5, unit: 'MINUTES') {
-          waitForQualityGate abortPipeline: true
         }
       }
     }

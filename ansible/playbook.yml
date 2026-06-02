@@ -322,14 +322,17 @@
           {% endfor %}
 
     - name: Install Jenkins plugins
-      ansible.builtin.command: >-
+      ansible.builtin.shell: >-
         java -jar /var/lib/jenkins/jenkins-cli.jar
         -s http://127.0.0.1:8080/
-        -auth admin:{{ jenkins_initial_password.content | b64decode | trim }}
-        install-plugin {{ jenkins_plugins | join(' ') }} -deploy
+        -http
+        -auth "admin:${JENKINS_INITIAL_PASSWORD}"
+        install-plugin {{ item }} -deploy
+      loop: "{{ jenkins_plugins }}"
       register: jenkins_plugin_install
-      changed_when: "'Installing' in jenkins_plugin_install.stdout or 'Installing' in jenkins_plugin_install.stderr or 'Updated' in jenkins_plugin_install.stdout or 'Updated' in jenkins_plugin_install.stderr"
-      no_log: true
+      changed_when: "'Installing' in jenkins_plugin_install.stdout or 'Installing' in jenkins_plugin_install.stderr or 'Updated' in jenkins_plugin_install.stdout or 'Updated' in jenkins_plugin_install.stderr or 'Success' in jenkins_plugin_install.stdout"
+      environment:
+        JENKINS_INITIAL_PASSWORD: "{{ jenkins_initial_password.content | b64decode | trim }}"
 
     - name: Restart Jenkins after plugin installation
       ansible.builtin.service:
@@ -349,7 +352,7 @@
           - "SonarQube is installed on port {{ sonarqube_port }} when install_sonarqube_server is true."
           - "Get the initial password with: sudo cat /var/lib/jenkins/secrets/initialAdminPassword"
           - "Jenkins plugins installed from: /var/lib/jenkins/fitness-plugins.txt"
-          - "After setup, configure SonarQube server name as SonarQube and SonarScanner tool name as SonarScanner."
+          - "After setup, create a Jenkins Secret text credential named sonarqube-token for the SonarQube token."
 
     - name: Verify installed tools
       ansible.builtin.command: "{{ item }}"
