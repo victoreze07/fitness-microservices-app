@@ -1,0 +1,328 @@
+---
+- name: Configure Jenkins CI server for the fitness project
+  hosts: jenkins
+  become: true
+  vars_files:
+    - group_vars/jenkins.yml
+
+  handlers:
+    - name: restart jenkins
+      ansible.builtin.service:
+        name: jenkins
+        state: restarted
+
+  tasks:
+    - name: Remove stale Jenkins apt repository file
+      ansible.builtin.file:
+        path: /etc/apt/sources.list.d/jenkins.list
+        state: absent
+
+    - name: Remove stale Jenkins repository keys
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/apt/keyrings/jenkins-keyring.asc
+        - /usr/share/keyrings/jenkins-keyring.asc
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install base packages
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - unzip
+          - git
+          - software-properties-common
+          - python3-pip
+          - awscli
+          - fontconfig
+        state: present
+
+    - name: Create apt keyrings directory
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Add Adoptium repository key
+      ansible.builtin.get_url:
+        url: https://packages.adoptium.net/artifactory/api/gpg/key/public
+        dest: /etc/apt/keyrings/adoptium.asc
+        mode: "0644"
+        force: true
+
+    - name: Add Adoptium apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/adoptium.asc] https://packages.adoptium.net/artifactory/deb {{ ansible_facts['distribution_release'] }} main"
+        filename: adoptium
+        state: present
+        update_cache: false
+
+    - name: Add Jenkins repository key
+      ansible.builtin.get_url:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+        dest: /etc/apt/keyrings/jenkins-keyring.asc
+        mode: "0644"
+        force: true
+
+    - name: Add Jenkins apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/"
+        filename: jenkins
+        state: present
+        update_cache: false
+
+    - name: Add Docker repository key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: "0644"
+
+    - name: Add Docker apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_facts['distribution_release'] }} stable"
+        filename: docker
+        state: present
+        update_cache: false
+
+    - name: Add NodeSource repository key
+      ansible.builtin.get_url:
+        url: https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+        dest: /etc/apt/keyrings/nodesource.asc
+        mode: "0644"
+
+    - name: Add NodeSource apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/nodesource.asc] https://deb.nodesource.com/node_{{ nodejs_major_version }}.x nodistro main"
+        filename: nodesource
+        state: present
+        update_cache: false
+
+    - name: Add Trivy repository key
+      ansible.builtin.get_url:
+        url: https://aquasecurity.github.io/trivy-repo/deb/public.key
+        dest: /etc/apt/keyrings/trivy.asc
+        mode: "0644"
+
+    - name: Add Trivy apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/trivy.asc] https://aquasecurity.github.io/trivy-repo/deb generic main"
+        filename: trivy
+        state: present
+        update_cache: false
+
+    - name: Install Jenkins, Docker, Node.js, and Trivy
+      ansible.builtin.apt:
+        update_cache: true
+        name:
+          - temurin-21-jdk
+          - jenkins
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+          - nodejs
+          - trivy
+        state: present
+
+    - name: Set Java 21 as default java
+      ansible.builtin.command: update-alternatives --set java /usr/lib/jvm/temurin-21-jdk-amd64/bin/java
+      changed_when: false
+
+    - name: Set Java 21 as default javac
+      ansible.builtin.command: update-alternatives --set javac /usr/lib/jvm/temurin-21-jdk-amd64/bin/javac
+      changed_when: false
+
+    - name: Reset failed Jenkins service state
+      ansible.builtin.command: systemctl reset-failed jenkins
+      changed_when: false
+      failed_when: false
+
+    - name: Add Jenkins and Ubuntu users to docker group
+      ansible.builtin.user:
+        name: "{{ item }}"
+        groups: docker
+        append: true
+      loop:
+        - jenkins
+        - "{{ ansible_user | default('ubuntu') }}"
+      notify: restart jenkins
+
+    - name: Install kubectl
+      ansible.builtin.get_url:
+        url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
+        dest: /usr/local/bin/kubectl
+        mode: "0755"
+
+    - name: Download Terraform zip
+      ansible.builtin.get_url:
+        url: "https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_linux_amd64.zip"
+        dest: "/tmp/terraform_{{ terraform_version }}_linux_amd64.zip"
+        mode: "0644"
+
+    - name: Install Terraform
+      ansible.builtin.unarchive:
+        src: "/tmp/terraform_{{ terraform_version }}_linux_amd64.zip"
+        dest: /usr/local/bin
+        remote_src: true
+        mode: "0755"
+
+    - name: Download SonarScanner
+      ansible.builtin.get_url:
+        url: "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-{{ sonar_scanner_version }}-linux-x64.zip"
+        dest: "/tmp/sonar-scanner-cli-{{ sonar_scanner_version }}-linux-x64.zip"
+        mode: "0644"
+
+    - name: Install SonarScanner
+      ansible.builtin.unarchive:
+        src: "/tmp/sonar-scanner-cli-{{ sonar_scanner_version }}-linux-x64.zip"
+        dest: /opt
+        remote_src: true
+        creates: "/opt/sonar-scanner-{{ sonar_scanner_version }}-linux-x64"
+
+    - name: Link SonarScanner
+      ansible.builtin.file:
+        src: "/opt/sonar-scanner-{{ sonar_scanner_version }}-linux-x64/bin/sonar-scanner"
+        dest: /usr/local/bin/sonar-scanner
+        state: link
+        force: true
+
+    - name: Enable and start Docker
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Configure SonarQube vm.max_map_count
+      ansible.posix.sysctl:
+        name: vm.max_map_count
+        value: "262144"
+        state: present
+        reload: true
+      when: install_sonarqube_server | bool
+
+    - name: Pull SonarQube Docker image
+      ansible.builtin.command: "docker pull {{ sonarqube_image }}"
+      changed_when: "'Downloaded newer image' in sonarqube_pull.stdout or 'Pull complete' in sonarqube_pull.stdout"
+      register: sonarqube_pull
+      when: install_sonarqube_server | bool
+
+    - name: Check SonarQube container
+      ansible.builtin.command: "docker ps -a --filter name=^/{{ sonarqube_container_name }}$ --format {% raw %}'{{.Names}}'{% endraw %}"
+      register: sonarqube_container
+      changed_when: false
+      when: install_sonarqube_server | bool
+
+    - name: Check running SonarQube container
+      ansible.builtin.command: "docker ps --filter name=^/{{ sonarqube_container_name }}$ --filter status=running --format {% raw %}'{{.Names}}'{% endraw %}"
+      register: sonarqube_running_container
+      changed_when: false
+      when: install_sonarqube_server | bool
+
+    - name: Run SonarQube container
+      ansible.builtin.command: >-
+        docker run -d
+        --name {{ sonarqube_container_name }}
+        --restart unless-stopped
+        -p {{ sonarqube_port }}:9000
+        {{ sonarqube_image }}
+      when:
+        - install_sonarqube_server | bool
+        - sonarqube_container.stdout == ""
+
+    - name: Ensure SonarQube container is running
+      ansible.builtin.command: "docker start {{ sonarqube_container_name }}"
+      register: sonarqube_start
+      changed_when: "'sonarqube' in sonarqube_start.stdout"
+      when:
+        - install_sonarqube_server | bool
+        - sonarqube_container.stdout != ""
+        - sonarqube_running_container.stdout == ""
+
+    - name: Wait for SonarQube HTTP port
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ sonarqube_port }}"
+        timeout: 240
+      when: install_sonarqube_server | bool
+
+    - name: Enable and start Jenkins
+      block:
+        - name: Start Jenkins service
+          ansible.builtin.service:
+            name: jenkins
+            state: started
+            enabled: true
+      rescue:
+        - name: Read Jenkins service status
+          ansible.builtin.command: systemctl status jenkins --no-pager -l
+          register: jenkins_status
+          changed_when: false
+          failed_when: false
+
+        - name: Read Jenkins journal logs
+          ansible.builtin.command: journalctl -u jenkins -n 80 --no-pager
+          register: jenkins_journal
+          changed_when: false
+          failed_when: false
+
+        - name: Show Jenkins failure diagnostics
+          ansible.builtin.debug:
+            msg:
+              - "{{ jenkins_status.stdout_lines }}"
+              - "{{ jenkins_journal.stdout_lines }}"
+
+        - name: Stop play because Jenkins failed to start
+          ansible.builtin.fail:
+            msg: "Jenkins failed to start. Review the service status and journal output above."
+
+    - name: Wait for Jenkins HTTP port
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 8080
+        timeout: 180
+
+    - name: Write Jenkins plugin list
+      ansible.builtin.copy:
+        dest: /var/lib/jenkins/fitness-plugins.txt
+        owner: jenkins
+        group: jenkins
+        mode: "0644"
+        content: |
+          {% for plugin in jenkins_plugins %}
+          {{ plugin }}
+          {% endfor %}
+
+    - name: Show Jenkins initial admin password location
+      ansible.builtin.debug:
+        msg:
+          - "Jenkins is installed on port 8080."
+          - "SonarQube is installed on port {{ sonarqube_port }} when install_sonarqube_server is true."
+          - "Get the initial password with: sudo cat /var/lib/jenkins/secrets/initialAdminPassword"
+          - "Plugin list written to: /var/lib/jenkins/fitness-plugins.txt"
+          - "After setup, configure SonarQube server name as SonarQube and SonarScanner tool name as SonarScanner."
+
+    - name: Verify installed tools
+      ansible.builtin.command: "{{ item }}"
+      changed_when: false
+      loop:
+        - java -version
+        - git --version
+        - node --version
+        - npm --version
+        - docker --version
+        - docker compose version
+        - trivy --version
+        - kubectl version --client=true
+        - terraform version
+        - aws --version
+        - sonar-scanner --version

@@ -13,6 +13,18 @@ The project can run locally with Docker Compose or deploy to Kubernetes.
 
 Terraform files are available in `terraform/` to create an AWS EKS cluster with one managed node group and install Argo CD.
 
+Terraform files for the Jenkins EC2 server are available in `terraform-ec2/`.
+
+```bash
+cd terraform-ec2
+cp terraform.tfvars.example terraform.tfvars
+terraform init
+terraform plan
+terraform apply
+```
+
+The Jenkins EC2 spec is Ubuntu Linux on `c5a.xlarge`. After the EC2 instance is created, use the Ansible playbook in `ansible/` to install Jenkins and CI tools.
+
 ```powershell
 cd terraform
 Copy-Item terraform.tfvars.example terraform.tfvars
@@ -116,11 +128,22 @@ Those values are configured with environment variables in `docker-compose.yml` a
 
 This repo includes a `Jenkinsfile` for CI/CD.
 
+An Ansible playbook for provisioning a Jenkins EC2 server is available in `ansible/`.
+
+```bash
+cp ansible/inventory.ini.example ansible/inventory.ini
+ansible-playbook -i ansible/inventory.ini ansible/playbook.yml
+```
+
+See `ansible/README.md` for the full EC2 setup steps.
+
 Pipeline stages:
 
 - Validate Node.js files with `node --check`.
 - Validate Docker Compose with `docker compose config`.
+- Run SonarQube code analysis.
 - Build Docker images for the frontend and all three services.
+- Scan Docker images with Trivy.
 - Optionally push images to a Docker registry.
 - Optionally deploy and update Kubernetes deployments, or let Argo CD sync the Kubernetes manifests from Git.
 
@@ -130,6 +153,8 @@ Jenkins agent requirements:
 - Node.js 18 or newer
 - Docker CLI with Docker daemon access
 - Docker Compose plugin
+- SonarQube Scanner
+- SonarQube Scanner for Jenkins plugin
 - Trivy
 - kubectl, if deploying to Kubernetes
 
@@ -144,11 +169,21 @@ fitness-kubeconfig
 
 `fitness-kubeconfig` should be a secret file credential containing the kubeconfig Jenkins should use for deployment.
 
+SonarQube Jenkins setup:
+
+- Install the `SonarQube Scanner for Jenkins` plugin.
+- Add a SonarQube server in Jenkins named `SonarQube`.
+- Add a SonarQube scanner tool in Jenkins named `SonarScanner`.
+- Generate a SonarQube token and store it in the Jenkins SonarQube server configuration.
+- Optional quality gate waiting requires a SonarQube webhook pointing to `http://JENKINS_URL/sonarqube-webhook/`.
+
 Typical Jenkins build parameters:
 
 ```text
 DOCKER_REGISTRY=docker.io/your-username
 IMAGE_TAG=
+RUN_SONARQUBE=true
+WAIT_FOR_SONAR_QUALITY_GATE=false
 FAIL_ON_TRIVY_FINDINGS=true
 PUSH_IMAGES=true
 DEPLOY_TO_K8S=true

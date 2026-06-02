@@ -1,0 +1,22 @@
+aws_region    = "us-east-1"
+project_name  = "fitness"
+instance_name = "fitness-jenkins-server"
+instance_type = "c5a.xlarge"
+
+# Use an existing EC2 key pair name from AWS.
+key_name = "dev-ec2.pem"
+
+# Defaults are open to the internet so Terraform will not prompt.
+# For better security, replace these with your public IP using /32.
+allowed_ssh_cidr = "0.0.0.0/0"
+allowed_web_cidr = "0.0.0.0/0"
+
+# Leave these empty to use the default VPC and one default subnet.
+vpc_id    = ""
+subnet_id = ""
+
+root_volume_size = 40
+
+tags = {
+  Environment = "dev"
+}

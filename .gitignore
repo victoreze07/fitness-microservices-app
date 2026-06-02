@@ -8,5 +8,6 @@ npm-debug.log*
 *.tfstate.*
 *.tfvars
 backend.hcl
+ansible/inventory.ini
 crash.log
 crash.*.log

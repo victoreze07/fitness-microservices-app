@@ -1,0 +1,18 @@
+---
+nodejs_major_version: "20"
+sonar_scanner_version: "6.2.1.4610"
+terraform_version: "1.8.5"
+kubectl_version: "v1.30.2"
+install_sonarqube_server: true
+sonarqube_container_name: sonarqube
+sonarqube_image: sonarqube:lts-community
+sonarqube_port: 9000
+
+jenkins_plugins:
+  - workflow-aggregator
+  - git
+  - credentials-binding
+  - sonar
+  - blueocean
+  - docker-workflow
+  - pipeline-stage-view
