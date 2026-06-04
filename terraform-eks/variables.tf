@@ -22,6 +22,24 @@ variable "cluster_version" {
   default     = null
 }
 
+variable "cluster_admin_principal_arn" {
+  description = "Primary IAM user or role ARN to grant Kubernetes cluster-admin access. Leave empty to use the AWS identity running Terraform."
+  type        = string
+  default     = ""
+}
+
+variable "cluster_admin_principal_arns" {
+  description = "Additional IAM user or role ARNs to grant Kubernetes cluster-admin access."
+  type        = list(string)
+  default     = []
+}
+
+variable "cluster_admin_access_policy_arn" {
+  description = "EKS access policy ARN to associate with cluster admin principals."
+  type        = string
+  default     = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+}
+
 variable "vpc_cidr" {
   description = "CIDR block for the EKS VPC."
   type        = string

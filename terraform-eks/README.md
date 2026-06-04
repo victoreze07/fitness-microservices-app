@@ -125,6 +125,14 @@ terraform plan
 terraform apply
 ```
 
+Set the Kubernetes admin principal in your local `terraform.tfvars` before applying:
+
+```hcl
+cluster_admin_principal_arn = "arn:aws:iam::<account-id>:user/<iam-user-name>"
+```
+
+Keep real IAM ARNs, account IDs, and other environment-specific values in `terraform.tfvars`. The repo ignores `*.tfvars`, so commit only `terraform.tfvars.example` with placeholders.
+
 ## Configure kubectl
 
 After apply completes, run the command from the `configure_kubectl` Terraform output.

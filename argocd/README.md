@@ -2,13 +2,6 @@
 
 These manifests connect Argo CD to the Kubernetes manifests in `k8s/`.
 
-Before applying, edit `argocd/fitness-application.yaml` and replace:
-
-```text
-https://github.com/YOUR_GITHUB_USERNAME/fitness-microservices.git
-```
-
-with your real GitHub repository URL.
 
 ## Install Argo CD
 
@@ -34,7 +27,7 @@ Check the application:
 
 ```powershell
 kubectl get applications -n argocd
-kubectl describe application fitness-microservices -n argocd
+kubectl describe application fitness-microservices-app -n argocd
 ```
 
 ## Open Argo CD UI

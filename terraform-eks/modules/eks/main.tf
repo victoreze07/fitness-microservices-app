@@ -21,6 +21,30 @@ resource "aws_eks_cluster" "this" {
   ]
 }
 
+resource "aws_eks_access_entry" "cluster_admin" {
+  for_each = toset(var.cluster_admin_principal_arns)
+
+  cluster_name  = aws_eks_cluster.this.name
+  principal_arn = each.value
+  type          = "STANDARD"
+
+  depends_on = [
+    aws_eks_cluster.this
+  ]
+}
+
+resource "aws_eks_access_policy_association" "cluster_admin" {
+  for_each = aws_eks_access_entry.cluster_admin
+
+  cluster_name  = aws_eks_cluster.this.name
+  principal_arn = each.value.principal_arn
+  policy_arn    = var.cluster_admin_access_policy_arn
+
+  access_scope {
+    type = "cluster"
+  }
+}
+
 resource "aws_eks_node_group" "this" {
   cluster_name    = aws_eks_cluster.this.name
   node_group_name = "${var.project_name}-node-group"

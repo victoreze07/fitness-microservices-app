@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: progress-service
-          image: progress-service:latest
+          image: victoreze07/progress-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 4003

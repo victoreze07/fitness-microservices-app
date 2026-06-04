@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: fitness-frontend:latest
+          image: victoreze07/fitness-frontend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000

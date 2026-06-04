@@ -13,6 +13,16 @@ variable "cluster_version" {
   type        = string
 }
 
+variable "cluster_admin_principal_arns" {
+  description = "IAM user or role ARNs to grant Kubernetes cluster-admin access."
+  type        = list(string)
+}
+
+variable "cluster_admin_access_policy_arn" {
+  description = "EKS access policy ARN to associate with cluster admin principals."
+  type        = string
+}
+
 variable "public_subnet_ids" {
   description = "Subnet IDs for the EKS cluster and managed node group."
   type        = list(string)

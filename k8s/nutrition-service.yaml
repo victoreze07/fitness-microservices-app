@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: nutrition-service
-          image: nutrition-service:latest
+          image: victoreze07/nutrition-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 4002
