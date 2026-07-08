@@ -12,7 +12,7 @@ Disk: 40 GiB gp3
 
 It also creates:
 
-- Security group for SSH, Jenkins, and optional SonarQube
+- Security group for SSH, Jenkins, optional SonarQube, optional Grafana, and optional Prometheus
 - IAM role and instance profile
 - SSM managed instance policy
 - ECR read-only policy
@@ -93,3 +93,16 @@ After Ansible finishes:
 ```text
 http://EC2_PUBLIC_IP:8080
 ```
+
+## Optional Web Ports
+
+The security group also allows these optional web ports through `allowed_web_cidr`:
+
+```text
+8080 - Jenkins
+9000 - SonarQube
+3001 - Grafana
+9090 - Prometheus
+```
+
+For better security, set `allowed_web_cidr` to your public IP with `/32` instead of `0.0.0.0/0`.

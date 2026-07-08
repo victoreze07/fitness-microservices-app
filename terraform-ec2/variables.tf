@@ -53,7 +53,7 @@ variable "allowed_ssh_cidr" {
 }
 
 variable "allowed_web_cidr" {
-  description = "CIDR allowed to access Jenkins and optional SonarQube web ports."
+  description = "CIDR allowed to access Jenkins, SonarQube, Grafana, and Prometheus web ports."
   type        = string
   default     = "0.0.0.0/0"
 }

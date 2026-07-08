@@ -30,6 +30,22 @@ kubectl get applications -n argocd
 kubectl describe application fitness-microservices-app -n argocd
 ```
 
+## Apply Monitoring
+
+Prometheus and Grafana are installed with the `kube-prometheus-stack` Helm chart through a separate Argo CD project.
+
+```powershell
+kubectl apply -f argocd/monitoring-project.yaml
+kubectl apply -f argocd/monitoring-application.yaml
+```
+
+Check the monitoring application:
+
+```powershell
+kubectl get application monitoring-stack -n argocd
+kubectl get pods -n monitoring
+```
+
 ## Open Argo CD UI
 
 ```powershell

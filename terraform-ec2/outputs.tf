@@ -23,6 +23,16 @@ output "sonarqube_url" {
   value       = "http://${aws_instance.jenkins.public_ip}:9000"
 }
 
+output "grafana_url" {
+  description = "Optional Grafana URL if exposed through this server."
+  value       = "http://${aws_instance.jenkins.public_ip}:3001"
+}
+
+output "prometheus_url" {
+  description = "Optional Prometheus URL if exposed through this server."
+  value       = "http://${aws_instance.jenkins.public_ip}:9090"
+}
+
 output "ansible_inventory_line" {
   description = "Inventory line to paste into ansible/inventory.ini."
   value       = "jenkins-server ansible_host=${aws_instance.jenkins.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/mnt/c/Users/vezeokonkwo/Documents/YOUR_KEY.pem"

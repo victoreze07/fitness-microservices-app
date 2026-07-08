@@ -27,6 +27,22 @@ resource "aws_security_group" "jenkins" {
     cidr_blocks = [var.allowed_web_cidr]
   }
 
+  ingress {
+    description = "Grafana optional"
+    from_port   = 3001
+    to_port     = 3001
+    protocol    = "tcp"
+    cidr_blocks = [var.allowed_web_cidr]
+  }
+
+  ingress {
+    description = "Prometheus optional"
+    from_port   = 9090
+    to_port     = 9090
+    protocol    = "tcp"
+    cidr_blocks = [var.allowed_web_cidr]
+  }
+
   egress {
     description = "All outbound"
     from_port   = 0
