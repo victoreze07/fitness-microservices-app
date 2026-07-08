@@ -1,16 +1,4 @@
 # Fitness Microservices
-![AWS](https://img.shields.io/badge/AWS-EKS-FF9900?style=flat&logo=amazonaws)
-![Terraform](https://img.shields.io/badge/Terraform-IaC-7B42BC?style=flat&logo=terraform)
-![Kubernetes](https://img.shields.io/badge/Kubernetes-Orchestration-326CE5?style=flat&logo=kubernetes)
-![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=flat&logo=docker)
-![Jenkins](https://img.shields.io/badge/Jenkins-CI%2FCD-D24939?style=flat&logo=jenkins)
-![ArgoCD](https://img.shields.io/badge/ArgoCD-GitOps-EF7B4D?style=flat&logo=argo)
-![Ansible](https://img.shields.io/badge/Ansible-Automation-EE0000?style=flat&logo=ansible)
-![SonarQube](https://img.shields.io/badge/SonarQube-Code_Quality-4E9BCD?style=flat&logo=sonarqube)
-![Trivy](https://img.shields.io/badge/Trivy-Security-1904DA?style=flat)
-![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-E6522C?style=flat&logo=prometheus)
-![Grafana](https://img.shields.io/badge/Grafana-Dashboards-F46800?style=flat&logo=grafana)
-![Node.js](https://img.shields.io/badge/Node.js-20.x-339933?style=flat&logo=node.js)
 
 A small Node.js fitness website split into four services:
 
